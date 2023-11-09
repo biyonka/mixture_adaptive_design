@@ -1,1 +1,1 @@
-# mixture_adaptive_design
+# Mixture Adaptive Design Code Files
