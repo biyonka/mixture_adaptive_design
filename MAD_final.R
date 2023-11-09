@@ -71,25 +71,11 @@ for (i in seq(1:t)){
 }
 
 
-#standard_results = compute_TS_Bern_CSs_standard(true_p1, true_p0, alpha, t, arm1_params, arm0_params)
-#
-# ate_standard = standard_results[[1]]
-# arm_path_standard = standard_results[[2]]
-# sig2_hats_standard = standard_results[[3]]
-# rewards_standard = standard_results[[4]]
-
 compute_CS_eta = function(eta, s_hats, alpha){
   V_is = (1/seq(1, t))*sqrt((((cumsum(s_hats) * eta**2)+1)/eta**2) * log(((cumsum(s_hats) * eta**2) + 1)/alpha**2))
   return(V_is)
 }
 
-# V_i_standard = compute_CS_eta_star(eta, sig2_hats_standard, alpha)
-# par(mfrow=c(1,1))
-# plot(seq(1, t), ate_standard+V_i_standard, type = 'l', ylim = c(-10, 10))
-# lines(seq(1, t), ate_standard-V_i_standard)
-# lines(seq(1, t), rep(true_p1-true_p0, t), col='red')
-# lines(seq(1, t), rep(1, t), col='blue')
-# lines(seq(1, t), rep(0, t), col='blue')
 # 
 
 compute_TS_Bern_CSs_MAD = function(true_p1, true_p0, alpha, t, arm1_params, arm0_params, delta){
@@ -133,12 +119,6 @@ compute_TS_Bern_CSs_MAD = function(true_p1, true_p0, alpha, t, arm1_params, arm0
     ate_MAD = append(ate_MAD, ate_i)
     #compute CS
     sig2_hats_MAD = append(sig2_hats_MAD, sigma2_hat_i)
-    #s_hat = sum(s_hats)
-    #print(s_hat)
-    ##do a grid search over possible eta to optimize for a chosen t and basically copute V_i later
-    ##why can't we just do a grid search over eta at every time and pick a new eta each time, if this CS works for all eta?
-    #V_i = (1/i)*sqrt((((s_hat * eta**2)+1)/eta**2) * log(((s_hat*eta**2) + 1)/alpha**2))
-    #V_is = append(V_is, V_i)
     #update parameters
     if(arm==1){
       arm1_params[1] = arm1_params[1]+y_i
@@ -318,10 +298,6 @@ coverage = ggplot(cov_df, aes(x = Time, y = avg_cov, color=Method, fill=Method))
       legend.title = element_text(size = 25))+ xlab('Time (log10 Scale)') #+ 
   #scale_linetype_manual(name = expression(paste(1-alpha)), values = c(2))#+   geom_hline(aes(yintercept=1)) +   geom_hline(aes(yintercept=0), alpha=0.5)
 
-
-ggsave(filename = paste0('coverage.png'),
-       plot = coverage, path = '~/Documents/Research/MAD/plots/', bg = 'transparent')
-
 #generate dataframe of rewards from each method
 #reward over the 400 timesteps, across the 100 iterations
 bern_rewards = as.vector(matrix(sapply(seq(1, N), function(i){testing_bernoulli_des[[i]]$reward}), byrow = FALSE, nrow = 1))
@@ -364,13 +340,6 @@ ham_time_avg_rewards_plot_log10=ggplot(rewards_plotting, aes(x = Time, y = time_
         legend.title = element_text(size = 22),  strip.text.x = element_text(size = 20), strip.text.y = element_text(size = 20)) + xlab('Time (log10 Scale)')
 
 
-ggsave(filename = paste0('ham_time_avg_rewards_plot_log10.png'),
-       plot = ham_time_avg_rewards_plot_log10, path = '~/Documents/Research/MAD/plots/', bg = 'transparent')
-
-ggsave(filename = paste0('ham_total_rewards_plot_log10.png'),
-       plot = ham_total_rewards_plot_log10, path = '~/Documents/Research/MAD/plots/', bg = 'transparent')
-
-
 ham_total_rewards_plot=ggplot(rewards_plotting, aes(x = Time, y = cum_avg_reward, color = Method, fill = Method)) + geom_line() +
   geom_ribbon(aes(ymax=cum_avg_reward + 2*se_cum_reward, ymin = cum_avg_reward - 2*se_cum_reward), alpha=0.3, colour = NA)+ 
   theme_minimal() +  ylab('Cumulative Average Reward')  + # theme(aspect.ratio = 1, axis.title =element_text(size=32), axis.text = element_text(size = 30)) 
@@ -382,14 +351,6 @@ ham_time_avg_rewards_plot=ggplot(rewards_plotting, aes(x = Time, y = time_avg_re
   theme_minimal() +  ylab('Time Average Reward') + # theme(aspect.ratio = 1, axis.title =element_text(size=32), axis.text = element_text(size = 30)) 
   theme(axis.title =element_text(size=25), axis.text = element_text(size = 20),legend.text = element_text(size = 20),
         legend.title = element_text(size = 25)) 
-
-ggsave(filename = paste0('ham_time_avg_rewards_plot.png'),
-       plot = ham_time_avg_rewards_plot, path = '~/Documents/Research/MAD/plots/', bg = 'transparent')
-
-ggsave(filename = paste0('ham_total_rewards_plot.png'),
-       plot = ham_total_rewards_plot, path = '~/Documents/Research/MAD/plots/', bg = 'transparent')
-
-
 #make plot for slide showing howard and Ham alone
 CS_standard = CS_ate_df[CS_ate_df$Method == 'Standard Design',]
 
